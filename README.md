@@ -1,6 +1,6 @@
 # Projinda
 
-##Snakeley
+## Snakeley
 
 ### What all this is about
 Vi skapar ett spel som användaren kör i webbrowsern.
