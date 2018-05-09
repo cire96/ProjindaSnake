@@ -1,7 +1,7 @@
 ﻿var config = {
     type: Phaser.AUTO,
-    width: 640,
-    height: 480,
+    width: 800,
+    height: 1000,
     scene: {
         preload: preload,
         create: create,
@@ -39,7 +39,7 @@ function create ()
 
         function Apple (scene, x, y)
         {
-            //?
+            //Calls the Image object to display the static image
             Phaser.GameObjects.Image.call(this, scene)
 
             //First posistion
@@ -48,7 +48,7 @@ function create ()
             this.setOrigin(0);
 
             this.total = 0;
-
+            //still confused about this
             scene.children.add(this);
         },
 
@@ -56,10 +56,11 @@ function create ()
         {
             this.total++;
 
-            //New posistion
+            //New posistion. But why 39 and 29?
             var x = Phaser.Math.Between(0, 39);
             var y = Phaser.Math.Between(0, 29);
             this.setPosition(x * 16, y * 16);
+            //Make snake go faster.
         }
 
     });
