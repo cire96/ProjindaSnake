@@ -1,7 +1,18 @@
-﻿var config = {
+//collision physics?
+//this.physics.add.overlap(player, stars, collectStar, null, this)
+//Geom
+
+var config = {
     type: Phaser.AUTO,
     width: 640,
     height: 480,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 0 },
+            debug: false
+        }
+    },
     scene: {
         preload: preload,
         create: create,
@@ -19,6 +30,8 @@ var DOWN = 1;
 var LEFT = 2;
 var RIGHT = 3;
 
+var HitPositionConstant=16;// If this is changed apple new position must be changed
+
 var game = new Phaser.Game(config);
 
 function preload ()
@@ -30,6 +43,7 @@ function preload ()
 }
 
 function create ()
+
 {
     var Apple = new Phaser.Class({
 
@@ -44,7 +58,7 @@ function create ()
 
             //First posistion
             this.setTexture('apple');
-            this.setPosition(x * 16, y * 16);
+            this.setPosition(x*HitPositionConstant, y*HitPositionConstant);
             this.setOrigin(0);
 
             this.total = 0;
@@ -59,7 +73,7 @@ function create ()
             //New posistion
             var x = Phaser.Math.Between(0, 39);
             var y = Phaser.Math.Between(0, 29);
-            this.setPosition(x * 16, y * 16);
+            this.setPosition(x*HitPositionConstant , y*HitPositionConstant );
         }
 
     });
@@ -74,7 +88,7 @@ function create ()
 
             this.body = scene.add.group();
 
-            this.head = this.body.create(x * 16, y * 16, 'body');
+            this.head = this.body.create(x*HitPositionConstant, y*HitPositionConstant, 'body');
             this.head.setOrigin(0);
 
             this.alive = true;
@@ -85,8 +99,8 @@ function create ()
 
             this.tail = new Phaser.Geom.Point(x, y);
 
-            this.heading = RIGHT;
-            this.direction = RIGHT;
+            this.heading = UP;
+            this.direction = UP;
         },
 
         update: function (time)
@@ -103,13 +117,7 @@ function create ()
 
         move: function (time)
         {
-            /**
-            * Based on the heading property (which is the direction the pgroup pressed)
-            * we update the headPosition value accordingly.
-            *
-            * The Math.wrap call allow the snake to wrap around the screen, so when
-            * it goes off any of the sides it re-appears on the other.
-            */
+
             switch (this.heading)
             {
                 case LEFT:
@@ -132,8 +140,15 @@ function create ()
             this.direction = this.heading;
 
             //  Update the body segments and place the last coordinate into this.tail
-            Phaser.Actions.ShiftPosition(this.body.getChildren(), this.headPosition.x * 16, this.headPosition.y * 16, 1, this.tail);
+            Phaser.Actions.ShiftPosition(
+              this.body.getChildren(),
+               this.headPosition.x *HitPositionConstant,
+                this.headPosition.y *HitPositionConstant,
+                 1,
+                  this.tail);
 
+            if (this.collidWithBody()==true){this.alive=false;}
+            //this.collidWithBody();
             //  Update the timer ready for the next movement
             this.moveTime = time + this.speed;
 
@@ -145,11 +160,12 @@ function create ()
             var newPart = this.body.create(this.tail.x, this.tail.y, 'body');
 
             newPart.setOrigin(0);
+            console.log(snake.body.getChildren()[0].x);
         },
 
         collideWithApple: function (apple)
         {
-            if (this.head.x === apple.x && this.head.y === apple.y)
+            if (this.head.x == apple.x && this.head.y == apple.y)
             {
                 this.grow();
 
@@ -161,14 +177,25 @@ function create ()
             {
                 return false;
             }
+        },
+        collidWithBody: function()
+
+        {
+          var bodyParts=this.body.getChildren();
+          for(var i = 1; i <bodyParts.length; i++)
+          {
+            if(this.head.x==bodyParts[i].x && this.head.y==bodyParts[i].y){console.log('hit body');return true;}
+          }
+          return false;
         }
 
     });
+
     this.add.image(400,300,'sky');
-    apple = new Apple(this, 3, 4);
+    apple = new Apple(this, 10, 4);
 
 
-    snake = new Snake(this, 8, 8);
+    snake = new Snake(this, 10, 20);
 
     //  Create our keyboard controls
     cursors = this.input.keyboard.createCursorKeys();
@@ -181,13 +208,7 @@ function update (time, delta)
         return;
     }
 
-    /**
-    * Check which key is pressed, and then change the direction the snake
-    * is heading based on that. The checks ensure you don't double-back
-    * on yourself, for example if you're moving to the right and you press
-    * the LEFT cursor, it ignores it, because the only valid directions you
-    * can move in at that time is up and down.
-    */
+
     if (cursors.left.isDown)
     {
       if (snake.direction === UP || snake.direction === DOWN)
