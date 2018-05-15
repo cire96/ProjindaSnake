@@ -9,7 +9,9 @@ class menu extends Phaser.Scene {
     this.load.image('singlePlayerButtom','assets/SingleP.png');
     this.load.image('highScoreButtom','assets/highScore.png');
     this.load.image('sky','assets/sky.png');
-    this.load.audio('starwars', ['assets/sw.wav', 'assets/sw.mp3']);
+
+    //Ljud fil gör scenen ändring långsam
+    //this.load.audio('starwars', ['assets/sw.wav', 'assets/sw.mp3']);
 
   }
 
@@ -39,6 +41,13 @@ class singlePlayer extends Phaser.Scene {
 
 
   create(){
+    var highScoreButtom=this.add.sprite(500, 300,'highScoreButtom').setInteractive();
+
+    highScoreButtom.on('pointerdown',function(pointer){
+      this.scene.start('highScore');
+    },this);
+
+
     this.input.keyboard.on('keyup',function(e){
       if (e.key=="g"){this.scene.start('menu');}
 
@@ -60,6 +69,7 @@ class highScore extends Phaser.Scene {
 
   create(){
     this.add.image(0,0,'sky').setOrigin(0,0);
+
 
 
   }
