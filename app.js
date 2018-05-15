@@ -11,7 +11,7 @@ class menu extends Phaser.Scene {
     this.load.image('sky','assets/sky.png');
 
     //Ljud fil gör scenen ändring långsam
-    //this.load.audio('starwars', ['assets/sw.wav', 'assets/sw.mp3']);
+    this.load.audio('starwars', 'assets/sw.wav');
 
   }
 
