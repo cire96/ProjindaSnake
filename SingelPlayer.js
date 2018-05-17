@@ -1,4 +1,3 @@
-
 var config = {
     type: Phaser.AUTO,
     width: 1000,
@@ -171,11 +170,70 @@ function create ()
         {
           if(this.head.x<0 || this.head.y<0 || this.head.x>4900 ||this.head.y>3075){return true;}
           return false;
+
         }
 
 
 
     });
+
+    var Apple = new Phaser.Class({
+
+        Extends: Phaser.GameObjects.Image,
+
+        initialize:
+
+        function Apple (scene, x, y,snake)
+        {
+            //?
+            Phaser.GameObjects.Image.call(this, scene)
+
+            //First posistion
+            this.setTexture('apple');
+            this.setPosition(x*HitPositionConstant, y*HitPositionConstant);
+            this.setOrigin(0);
+            this.snakeX=snake.head.x;
+            this.snakeY=snake.head.y;
+
+            this.total = 0;
+
+            scene.children.add(this);
+        },
+
+        eat: function ()
+        {
+            this.total++;
+
+            //New posistion// fixa med mod 16?
+            var x = Phaser.Math.Between(this.snakeX-150, this.snakeX+150);
+            x=x-(x%HitPositionConstant)
+            var y = Phaser.Math.Between(this.snakeY-100, this.snakeY+100);
+            y=y-(y%HitPositionConstant)
+            console.log(x +"---"+ y);
+            this.setPosition(x , y );
+        }
+
+
+
+    });
+    var Goal=new Phaser.Class({
+        Extends: Phaser.GameObjects.Image,
+
+        initialize:
+
+        function Gaol(scene,x,y)
+        {
+          Phaser.GameObjects.Image.call(this, scene)
+
+          //First posistion
+          this.setTexture('body');
+
+          this.setPosition(x-x%HitPositionConstant, y-y%HitPositionConstant);
+          this.setOrigin(0);
+
+          scene.children.add(this);
+        }
+
 
     var Apple = new Phaser.Class({
 
@@ -234,6 +292,7 @@ function create ()
 
 
     })
+
 
     //this.cameras.main.setSize(640, 480);
     //this.impact.world.setBounds(640,480);
