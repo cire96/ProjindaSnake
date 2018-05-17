@@ -1,59 +1,53 @@
-var config = {
-    type: Phaser.AUTO,
-    width: 1000,
-    height: 575,
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 0 },
-            debug: false
-        }
-    },
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
-};
 
-var snake;
-var apple;
-var cursors;
 
-//  Direction consts
-var UP = 0;
-var DOWN = 1;
-var LEFT = 2;
-var RIGHT = 3;
 
-var HitPositionConstant=16;// If this is changed apple new position must be changed
 
-var game = new Phaser.Game(config);
+class singlePlayer extends Phaser.Scene {
+//called when creted
+  constructor(){
+    super({key:"singlePlayer"}); //parentconstructer, a key to be able to call it by name
+    this.trunks;
+    this.apples;
+    this.snake;
+    this.goal;
+    this.cursors;
+    this.UP = 0;
+    this.DOWN = 1;
+    this.LEFT = 2;
+    this.RIGHT = 3;
+    this.HitPositionConstant=16;
+    this.firstcamera;
+    this.worldBoundX=4900;
+    this.worldBoundY=3075;
+    this.gamePauseBool;
 
-function preload ()
-{
+    this.shakeCamera;
+
+  }
+
+  preload(){
     this.load.image('apple', 'assets/firstaid.png');
     this.load.image('body', 'assets/star.png');
     this.load.image('barrier', 'assets/platform.png');
     this.load.image('sky', 'assets/sky.png');
-    this.load.image('bak','assets/BakSnake2.0.png')
-}
+    this.load.image('bak','assets/BakSnake3.0.png');
+    this.load.image('trunk','assets/trunk.png')
 
-function create ()
+  }
 
-{
+  create(time){
+
     var Snake = new Phaser.Class({
 
         initialize:
 
         function Snake (scene, x, y)
         {
+            this.scene=scene
             this.headPosition = new Phaser.Geom.Point(x, y);
 
-            this.body = scene.add.group();
-
-            this.head = this.body.create(x*HitPositionConstant, y*HitPositionConstant, 'body');
-            this.head.setOrigin(0);
+            this.body = scene.physics.add.group();
+            this.head = this.body.create(x*this.scene.HitPositionConstant, y*this.scene.HitPositionConstant, 'body');
 
             this.alive = true;
 
@@ -63,13 +57,13 @@ function create ()
 
             this.tail = new Phaser.Geom.Point(x, y);
 
-            this.heading = UP;
-            this.direction = UP;
+            this.heading = scene.UP;
+            this.direction = scene.UP;
         },
 
-        update: function (time)
+        update:function(time)
         {
-            if (time >= this.moveTime)
+            if (time >= this.moveTime && !this.scene.gamePauseBool)
             {
                 return this.move(time);
             }
@@ -84,19 +78,19 @@ function create ()
 
             switch (this.heading)
             {
-                case LEFT:
+                case this.scene.LEFT:
                     this.headPosition.x = this.headPosition.x - 1;
                     break;
 
-                case RIGHT:
+                case this.scene.RIGHT:
                     this.headPosition.x = this.headPosition.x + 1;
                     break;
 
-                case UP:
+                case this.scene.UP:
                     this.headPosition.y = this.headPosition.y - 1;
                     break;
 
-                case DOWN:
+                case this.scene.DOWN:
                     this.headPosition.y = this.headPosition.y + 1;
                     break;
             }
@@ -106,14 +100,14 @@ function create ()
             //  Update the body segments and place the last coordinate into this.tail
             Phaser.Actions.ShiftPosition(
               this.body.getChildren(),
-               this.headPosition.x *HitPositionConstant,
-                this.headPosition.y *HitPositionConstant,
+               this.headPosition.x *this.scene.HitPositionConstant,
+                this.headPosition.y *this.scene.HitPositionConstant,
                  1,
                   this.tail);
 
             if (this.collidWithBody()==true){this.alive=false;}
             if (this.collidWithBounds()==true){this.alive=false;}
-            //this.collidWithBody();
+
             //  Update the timer ready for the next movement
             this.moveTime = time + this.speed;
 
@@ -122,39 +116,7 @@ function create ()
 
         grow: function ()
         {
-            var newPart = this.body.create(this.tail.x, this.tail.y, 'body');
-
-            newPart.setOrigin(0);
-            console.log(snake.body.getChildren()[0].x);
-        },
-
-        collideWithApple: function (apple)
-        {
-            if (this.head.x == apple.x && this.head.y == apple.y)
-            {
-                this.grow();
-                apple.eat();
-
-                this.speed=this.speed*0.98;
-
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        },
-
-        collideWithGaol: function (goal)
-        {
-            if (this.head.x == goal.x && this.head.y == goal.y)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            this.body.create(this.tail.x, this.tail.y, 'body');
         },
 
         collidWithBody: function()
@@ -162,201 +124,117 @@ function create ()
           var bodyParts=this.body.getChildren();
           for(var i = 1; i <bodyParts.length; i++)
           {
-            if(this.head.x==bodyParts[i].x && this.head.y==bodyParts[i].y){console.log('hit body');return true;}
+            if(this.head.x==bodyParts[i].x && this.head.y==bodyParts[i].y){;return true;}
           }
           return false;
         },
         collidWithBounds: function()
         {
-          if(this.head.x<0 || this.head.y<0 || this.head.x>4900 ||this.head.y>3075){return true;}
+          if(this.head.x<0 || this.head.y<0 || this.head.x>this.scene.worldBoundX ||this.head.y>this.scene.worldBoundY){return true;}
           return false;
-
         }
 
 
 
     });
 
-    var Apple = new Phaser.Class({
+    this.gamePauseBool=false;
 
-        Extends: Phaser.GameObjects.Image,
-
-        initialize:
-
-        function Apple (scene, x, y,snake)
-        {
-            //?
-            Phaser.GameObjects.Image.call(this, scene)
-
-            //First posistion
-            this.setTexture('apple');
-            this.setPosition(x*HitPositionConstant, y*HitPositionConstant);
-            this.setOrigin(0);
-            this.snakeX=snake.head.x;
-            this.snakeY=snake.head.y;
-
-            this.total = 0;
-
-            scene.children.add(this);
-        },
-
-        eat: function ()
-        {
-            this.total++;
-
-            //New posistion// fixa med mod 16?
-            var x = Phaser.Math.Between(this.snakeX-150, this.snakeX+150);
-            x=x-(x%HitPositionConstant)
-            var y = Phaser.Math.Between(this.snakeY-100, this.snakeY+100);
-            y=y-(y%HitPositionConstant)
-            console.log(x +"---"+ y);
-            this.setPosition(x , y );
-        }
+    this.cameras.main.setBounds(0, 0, this.worldBoundX, this.worldBoundY);
 
 
+    this.add.sprite(0,0,'bak').setOrigin(0,0);
+    this.apples=this.physics.add.group();
+    this.apples.create(200,300,'apple');
+    this.trunks=this.physics.add.group();
+    this.trunks.create(600,300,'trunk');
 
-    });
-    var Goal=new Phaser.Class({
-        Extends: Phaser.GameObjects.Image,
-
-        initialize:
-
-        function Gaol(scene,x,y)
-        {
-          Phaser.GameObjects.Image.call(this, scene)
-
-          //First posistion
-          this.setTexture('body');
-
-          this.setPosition(x-x%HitPositionConstant, y-y%HitPositionConstant);
-          this.setOrigin(0);
-
-          scene.children.add(this);
-        }
+    this.goal=this.physics.add.sprite(100,100,'body');
 
 
-    var Apple = new Phaser.Class({
+    this.snake = new Snake(this, 10, 20);
 
-        Extends: Phaser.GameObjects.Image,
+      //New posistion for apple when eaten
+    this.physics.add.collider(this.snake.head,this.apples,function(snake,apple){
+      var x,y;
+      this.snake.grow();
+      this.snake.speed=this.snake.speed*0.99;
+      x = Phaser.Math.Between(this.snake.head.x-150, this.snake.head.x+300);
+      y = Phaser.Math.Between(this.snake.head.y-100, this.snake.head.y+200);
+      console.log('first'+x+'**'+y)
+      if(x<0+50){x=x+500}
+      if(x>this.worldBoundX-300){x=x-500}//worldBoundX
+      if(y<0+50){y=y+500}
+      if(y>this.worldBoundY-300){y=y-500}//worldBoundY
+      console.log('second'+x+'**'+y)
 
-        initialize:
+      apple.disableBody(true,true);
+      this.apples.create(x,y,'apple')
+    },null,this);
+    this.physics.add.collider(this.apples,this.trunks,function(apple,trunk){
+      //If apple is positioned on a trunk its removed and created some where else
+      var x = Phaser.Math.Between(this.snake.head.x+150, this.snake.head.x+300);
+      var y = Phaser.Math.Between(this.snake.head.y+100, this.snake.head.y+200);
+      apple.disableBody(true,true);
+      this.apples.create(x,y,'apple')
+    },null,this)
 
-        function Apple (scene, x, y,snake)
-        {
-            //?
-            Phaser.GameObjects.Image.call(this, scene)
+    this.physics.add.collider(this.snake.head,this.goal,function(){
+      this.scene.start('win')
+      //poäng
+    },null,this)
 
-            //First posistion
-            this.setTexture('apple');
-            this.setPosition(x*HitPositionConstant, y*HitPositionConstant);
-            this.setOrigin(0);
-            this.snakeX=snake.head.x;
-            this.snakeY=snake.head.y;
+    this.physics.add.collider(this.snake.head,this.trunks,function(){this.cameras.main.shake(1000);this.snake.alive=false;},null,this);
 
-            this.total = 0;
-
-            scene.children.add(this);
-        },
-
-        eat: function ()
-        {
-            this.total++;
-
-            //New posistion// fixa med mod 16?
-            var x = Phaser.Math.Between(this.snakeX-150, this.snakeX+150);
-            x=x-(x%HitPositionConstant)
-            var y = Phaser.Math.Between(this.snakeY-100, this.snakeY+100);
-            y=y-(y%HitPositionConstant)
-            console.log(x +"---"+ y);
-            this.setPosition(x , y );
-        }
-
-    });
-    var Goal=new Phaser.Class({
-        Extends: Phaser.GameObjects.Image,
-
-        initialize:
-
-        function Gaol(scene,x,y)
-        {
-          Phaser.GameObjects.Image.call(this, scene)
-
-          //First posistion
-          this.setTexture('body');
-
-          this.setPosition(x-x%HitPositionConstant, y-y%HitPositionConstant);
-          this.setOrigin(0);
-
-          scene.children.add(this);
-        }
-
-
-    })
-
-
-    //this.cameras.main.setSize(640, 480);
-    //this.impact.world.setBounds(640,480);
-    this.add.sprite(2485,1550,'bak');
-    snake = new Snake(this, 10, 20);
-    goal= new Goal(this,200,200)
-    apple = new Apple(this, 30, 30,snake);
-
-
-
-
-    //his.physics.impact.enable(snake);
-    //snake.head.setActive().setVelocity(300, 200).setBounce(1);
-    firstcamera=this.cameras.main.startFollow(snake.head);
-    //snake.onWorldBound=true;
-
+    this.firstcamera=this.cameras.main.startFollow(this.snake.head);
 
     //  Create our keyboard controls
-    cursors = this.input.keyboard.createCursorKeys();
-}
+    this.cursors = this.input.keyboard.createCursorKeys();
+  }
 
-function update (time, delta)
-{
-    if (!snake.alive)
+
+
+
+
+  update(time, delta){
+    if (!this.snake.alive)
     {
-        return;
+        this.scene.start('gameOver');
     }
 
 
-    if (cursors.left.isDown)
+    if (this.cursors.left.isDown)
     {
-      if (snake.direction === UP || snake.direction === DOWN)
+      if (this.snake.direction === this.UP || this.snake.direction === this.DOWN)
       {
-          snake.heading = LEFT;
+          this.snake.heading = this.LEFT;
       }
     }
-    else if (cursors.right.isDown)
+    else if (this.cursors.right.isDown)
     {
-      if (snake.direction === UP || snake.direction === DOWN)
+      if (this.snake.direction === this.UP || this.snake.direction === this.DOWN)
       {
-          snake.heading = RIGHT;
+          this.snake.heading = this.RIGHT;
       }
     }
-    else if (cursors.up.isDown)
+    else if (this.cursors.up.isDown)
     {
-      if (snake.direction === LEFT || snake.direction === RIGHT)
+      if (this.snake.direction === this.LEFT || this.snake.direction === this.RIGHT)
       {
-          snake.heading = UP;
+          this.snake.heading = this.UP;
       }
     }
-    else if (cursors.down.isDown)
+    else if (this.cursors.down.isDown)
     {
-      if (snake.direction === LEFT || snake.direction === RIGHT)
+      if (this.snake.direction === this.LEFT || this.snake.direction === this.RIGHT)
       {
-          snake.heading = DOWN;
+          this.snake.heading = this.DOWN;
       }
     }
 
-    if (snake.update(time))
+    if (this.snake.update(time))
     {
-        //  If the snake updated, we need to check for collision against food
-
-        snake.collideWithApple(apple);
-        snake.collideWithGaol(goal)
 
     }
+  }
 }

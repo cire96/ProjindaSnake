@@ -11,17 +11,20 @@ class menu extends Phaser.Scene {
     this.load.image('sky','assets/sky.png');
 
     //Ljud fil gör scenen ändring långsam
-    this.load.audio('starwars', 'assets/sw.wav');
+    //this.load.audio('starwars', 'assets/sw.wav');
 
   }
 
+
+
   create(){
+
     this.add.image(0,0,'forest').setOrigin(0,0);
     var singlePlayerButtom=this.add.sprite(500, 200, 'singlePlayerButtom').setInteractive();
     var highScoreButtom=this.add.sprite(500, 300,'highScoreButtom').setInteractive();
 
     singlePlayerButtom.on('pointerdown', function (pointer){
-      this.scene.start("singlePlayer");
+      this.scene.start('singlePlayer');
     },this)
 
     highScoreButtom.on('pointerdown',function(pointer){
@@ -33,32 +36,6 @@ class menu extends Phaser.Scene {
 }
 
 
-class singlePlayer extends Phaser.Scene {
-//called when creted
-  constructor(){
-    super({key:"singlePlayer"}); //parentconstructer, a key to be able to call it by name
-  }
-
-
-  create(){
-    var highScoreButtom=this.add.sprite(500, 300,'highScoreButtom').setInteractive();
-
-    highScoreButtom.on('pointerdown',function(pointer){
-      this.scene.start('highScore');
-    },this);
-
-
-    this.input.keyboard.on('keyup',function(e){
-      if (e.key=="g"){this.scene.start('menu');}
-
-    },this);
-
-  }
-
-  update(){
-
-  }
-}
 
 class highScore extends Phaser.Scene {
 //called when creted
@@ -76,6 +53,80 @@ class highScore extends Phaser.Scene {
 
 }
 
+class gameOver extends Phaser.Scene{
+
+  constructor(){
+    super({key:"gameOver"}); //parentconstructer, a key to be able to call it by name
+  }
+
+
+  create(){
+    this.add.image(0,0,'forest').setOrigin(0,0);
+    var menubuttom=this.add.sprite(500, 200, 'star').setInteractive();
+    var replay=this.add.sprite(500, 300,'singlePlayerButtom').setInteractive();
+
+    replay.on('pointerdown', function (pointer){
+      this.scene.start("singlePlayer");
+    },this)
+
+    menubuttom.on('pointerdown',function(pointer){
+      this.scene.start('menu');
+    },this);
+
+  }
+
+}
+class pause extends Phaser.Scene{
+  constructor(){
+    super({key:"pause"})
+  }
+  create(){
+    this.add.image(0,0,'sky').setOrigin(0,0);
+    var continueButtom=this.add.sprite(500, 200, 'singlePlayerButtom').setInteractive();
+    var quitButtom=this.add.sprite(500, 300,'highScoreButtom').setInteractive();
+
+    continueButtom.on('pointerdown', function (pointer){
+
+
+      this.scene.moveDown();
+      console.log('yes')
+      //this.scene.resume('singlePlayer');
+      console.log('and fuck')
+    },this)
+
+    quitButtom.on('pointerdown',function(pointer){
+      this.scene.start('menu')
+
+    },this);
+
+  }
+}
+
+class win extends Phaser.Scene{
+
+  constructor(){
+    super({key:"win"}); //parentconstructer, a key to be able to call it by name
+  }
+
+
+  create(){
+    this.add.image(0,0,'forest').setOrigin(0,0);
+    var menubuttom=this.add.sprite(500, 200, 'body').setInteractive();
+    var replay=this.add.sprite(500, 300,'singlePlayerButtom').setInteractive();
+
+    replay.on('pointerdown', function (pointer){
+      this.scene.start("singlePlayer");
+    },this)
+
+    menubuttom.on('pointerdown',function(pointer){
+      this.scene.start('menu');
+    },this);
+
+  }
+
+}
+
+
 
 
 var config = {
@@ -88,7 +139,7 @@ var config = {
           gravity: {y : 0}
       }
   },
-  scene: [menu, singlePlayer, highScore]
+  scene: [menu, singlePlayer, highScore, gameOver,pause,win]
 
 };
 
