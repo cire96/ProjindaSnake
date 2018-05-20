@@ -178,23 +178,7 @@ class singlePlayer extends Phaser.Scene {
       this.snake.grow();
     }
 
-      //New posistion for apple when eaten
-    this.physics.add.collider(this.snake.head,this.apples,function(snake,apple){
-      var x,y;
-      this.snake.grow();
-      this.snake.speed=this.snake.speed*0.99;
-      x = Phaser.Math.Between(this.snake.head.x-150, this.snake.head.x+300);
-      y = Phaser.Math.Between(this.snake.head.y-100, this.snake.head.y+200);
-      console.log('first'+x+'**'+y)
-      if(x<0+50){x=x+500}
-      if(x>this.worldBoundX-300){x=x-500}//worldBoundX
-      if(y<0+50){y=y+500}
-      if(y>this.worldBoundY-300){y=y-500}//worldBoundY
-      console.log('second'+x+'**'+y)
 
-      apple.disableBody(true,true);
-      this.apples.create(x,y,'apple')
-    },null,this);
     this.physics.add.collider(this.apples,this.trunks,function(apple,trunk){
       //If apple is positioned on a trunk its removed and created some where else
       var x = Phaser.Math.Between(50, 2450);
@@ -213,6 +197,27 @@ class singlePlayer extends Phaser.Scene {
 
     //  Create our keyboard controls
     this.cursors = this.input.keyboard.createCursorKeys();
+
+    //New posistion for apple when eaten
+  this.physics.add.collider(this.snake.head,this.apples,function(snake,apple){
+    var x,y;
+    this.snake.grow();
+    this.snake.speed=this.snake.speed*0.99;
+    x = Phaser.Math.Between(this.snake.head.x-150, this.snake.head.x+300);
+    y = Phaser.Math.Between(this.snake.head.y-100, this.snake.head.y+200);
+    //console.log('first'+x+'**'+y)
+    if(x<0+50){x=x+500}
+    if(x>this.worldBoundX-300){x=x-500}//worldBoundX
+    if(y<0+50){y=y+500}
+    if(y>this.worldBoundY-300){y=y-500}//worldBoundY
+    //console.log('second'+x+'**'+y)
+
+    apple.disableBody(true,true);
+    this.apples.create(x,y,'apple')
+
+  },null,this);
+
+
   }
 
 
