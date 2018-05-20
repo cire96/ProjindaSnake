@@ -1,12 +1,10 @@
-# Projinda
+# Snakeley
 
-## Snakeley
+## What all this is about
+We have created a game that runs in the browser.
 
-### What all this is about
-Vi skapar ett spel som användaren kör i webbrowsern.
-
-Konceptet kommer vara att köra som Nokias gamla Snake-spel.
-Men vår version kommer göra det möjligt att kör multi-player omgånger (max två personer kan spela samtidigt), och att verision har mål som man ska uppfylla.
+The main conscept of the game is to have a snake that grows as it eats fruit, much like the old Nokia and nostalgic Nokia-game.
+Our version, however, implements a feature of playing two people against eachother or as a single player, and also a goal wich the user is supposed to reach.
 
 ## How-to
 This is the guide on how to run the program on your device.
