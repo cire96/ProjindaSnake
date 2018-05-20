@@ -1,14 +1,18 @@
-
-
-
-
-class singlePlayer extends Phaser.Scene {
+class multiPlayer extends Phaser.Scene {
 //called when creted
   constructor(){
-    super({key:"singlePlayer"}); //parentconstructer, a key to be able to call it by name
+    super({key:"multiPlayer"}); //parentconstructer, a key to be able to call it by name
     this.trunks;
     this.apples;
+
     this.snake;
+
+    this.snake2;
+    this.keyA ;
+    this.keyD ;
+    this.keyS ;
+    this.keyW ;
+
     this.goal;
     this.cursors;
     this.UP = 0;
@@ -21,14 +25,17 @@ class singlePlayer extends Phaser.Scene {
     this.worldBoundY=1500;
     this.gamePauseBool;
 
-    this.shakeCamera;
+    this.snake1Camera;
+    this.snake2Camera;
 
   }
 
   preload(){
     this.load.image('apple', 'assets/grape.png');
-    this.load.image('body', 'assets/red_body.png');
-    this.load.image('head','assets/head_red')
+    this.load.image('body_red', 'assets/red_body.png');
+    this.load.image('head_red','assets/head_red');
+    this.load.image('body_blue', 'assets/blue_body.png');
+    this.load.image('head_blue','assets/head_blue');
     this.load.image('barrier', 'assets/platform.png');
     this.load.image('sky', 'assets/sky.png');
     this.load.image('bak','assets/background4.0.png');
@@ -36,7 +43,6 @@ class singlePlayer extends Phaser.Scene {
     this.load.image('bush','assets/bush.png');
     this.load.image('stump','assets/tree_stump.png');
     this.load.image('goal','assets/goal.png');
-
 
   }
 
@@ -46,13 +52,15 @@ class singlePlayer extends Phaser.Scene {
 
         initialize:
 
-        function Snake (scene, x, y)
+        function Snake (scene, x, y,color)
         {
             this.scene=scene
+            this.color=color
             this.headPosition = new Phaser.Geom.Point(x, y);
 
             this.body = scene.physics.add.group();
-            this.head = this.body.create(x*this.scene.HitPositionConstant, y*this.scene.HitPositionConstant, 'head');
+
+            this.head = this.body.create(x*this.scene.HitPositionConstant, y*this.scene.HitPositionConstant, 'head_'+color);
 
             this.alive = true;
 
@@ -64,6 +72,7 @@ class singlePlayer extends Phaser.Scene {
 
             this.heading = scene.UP;
             this.direction = scene.UP;
+
         },
 
         update:function(time)
@@ -111,7 +120,7 @@ class singlePlayer extends Phaser.Scene {
                   this.tail);
 
             if (this.collidWithBody()==true){this.alive=false;}
-            if (this.collidWithBounds()==true){this.alive=false;}
+            if (this.collidWithBounds()==true){console.log(this.body);this.alive=false;}
 
             //  Update the timer ready for the next movement
             this.moveTime = time + this.speed;
@@ -121,7 +130,7 @@ class singlePlayer extends Phaser.Scene {
 
         grow: function ()
         {
-            var part=this.body.create(this.tail.x, this.tail.y, 'body').setDepth(0);//setDepth
+            this.body.create(this.tail.x, this.tail.y, 'body_'+this.color);
 
         },
 
@@ -146,7 +155,12 @@ class singlePlayer extends Phaser.Scene {
 
     this.gamePauseBool=false;
 
-    this.cameras.main.setBounds(0, 0, this.worldBoundX, this.worldBoundY);
+    this.snake1Camera=this.cameras.add(500,0,500,575)
+    this.snake2Camera=this.cameras.add(0,0,500,575)
+
+    this.snake1Camera.setBounds(0, 0, this.worldBoundX, this.worldBoundY);
+    this.snake2Camera.setBounds(0, 0, this.worldBoundX, this.worldBoundY);
+
 
     this.add.sprite(0,0,'bak').setOrigin(0,0);
 
@@ -170,12 +184,11 @@ class singlePlayer extends Phaser.Scene {
     this.trunks.create(580,1600,'stump');
     this.trunks.create(2000,800,'bush');
 
-
-
-
-    this.snake = new Snake(this, 10, 21);
+    this.snake = new Snake(this, 10, 20,'red');
+    this.snake2=new Snake(this, 70, 21,'blue');
     for(var i=0;i<2;i++){
       this.snake.grow();
+      this.snake2.grow();
     }
 
       //New posistion for apple when eaten
@@ -185,16 +198,47 @@ class singlePlayer extends Phaser.Scene {
       this.snake.speed=this.snake.speed*0.99;
       x = Phaser.Math.Between(this.snake.head.x-150, this.snake.head.x+300);
       y = Phaser.Math.Between(this.snake.head.y-100, this.snake.head.y+200);
-      console.log('first'+x+'**'+y)
       if(x<0+50){x=x+500}
       if(x>this.worldBoundX-300){x=x-500}//worldBoundX
       if(y<0+50){y=y+500}
       if(y>this.worldBoundY-300){y=y-500}//worldBoundY
-      console.log('second'+x+'**'+y)
-
       apple.disableBody(true,true);
       this.apples.create(x,y,'apple')
     },null,this);
+    this.physics.add.collider(this.snake.head,this.goal,function(){
+      this.scene.start('win')
+      //poäng
+    },null,this)
+    this.physics.add.collider(this.snake.head,this.trunks,function(){this.snake.alive=false;},null,this);
+    this.snake1Camera.startFollow(this.snake.head);
+
+
+    //create keys
+    this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+    this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    //New posistion for apple when eaten
+    this.physics.add.collider(this.snake2.head,this.apples,function(snake2,apple){
+      var x,y;
+      this.snake2.grow();
+      this.snake.speed=this.snake2.speed*0.99;
+      x = Phaser.Math.Between(this.snake2.head.x-150, this.snake2.head.x+300);
+      y = Phaser.Math.Between(this.snake2.head.y-100, this.snake2.head.y+200);
+      if(x<0+50){x=x+500}
+      if(x>this.worldBoundX-300){x=x-500}//worldBoundX
+      if(y<0+50){y=y+500}
+      if(y>this.worldBoundY-300){y=y-500}//worldBoundY
+      apple.disableBody(true,true);
+      this.apples.create(x,y,'apple')
+    },null,this);
+    this.physics.add.collider(this.snake2.head,this.goal,function(){
+    this.scene.start('win')
+    //poäng
+  },null,this)
+    this.physics.add.collider(this.snake2.head,this.trunks,function(){this.snake2.alive=false;},null,this);
+    this.snake2Camera.startFollow(this.snake2.head);
+
     this.physics.add.collider(this.apples,this.trunks,function(apple,trunk){
       //If apple is positioned on a trunk its removed and created some where else
       var x = Phaser.Math.Between(50, 2450);
@@ -202,15 +246,6 @@ class singlePlayer extends Phaser.Scene {
       apple.disableBody(true,true);
       this.apples.create(x,y,'apple')
     },null,this)
-
-    this.physics.add.collider(this.snake.head,this.goal,function(){
-      this.scene.start('win',{id:3});
-    },null,this)
-
-    this.physics.add.collider(this.snake.head,this.trunks,function(){this.snake.alive=false;},null,this);
-
-    this.firstcamera=this.cameras.main.startFollow(this.snake.head);
-
     //  Create our keyboard controls
     this.cursors = this.input.keyboard.createCursorKeys();
   }
@@ -222,8 +257,13 @@ class singlePlayer extends Phaser.Scene {
   update(time, delta){
     if (!this.snake.alive)
     {
-        this.scene.start('gameOver');
+      this.scene.start('win',{id:2});
     }
+    if (!this.snake2.alive)
+    {
+      this.scene.start('win',{id:1});
+    }
+
 
 
     if (this.cursors.left.isDown)
@@ -232,7 +272,6 @@ class singlePlayer extends Phaser.Scene {
       {
           this.snake.heading = this.LEFT;
           this.snake.head.angle=-90;
-
       }
     }
     else if (this.cursors.right.isDown)
@@ -241,7 +280,6 @@ class singlePlayer extends Phaser.Scene {
       {
           this.snake.heading = this.RIGHT;
           this.snake.head.angle=90;
-
       }
     }
     else if (this.cursors.up.isDown)
@@ -258,13 +296,65 @@ class singlePlayer extends Phaser.Scene {
       {
           this.snake.heading = this.DOWN;
           this.snake.head.angle=180;
-
       }
     }
 
-    if (this.snake.alive)
+
+    if (this.keyA.isDown)
     {
-      this.snake.update(time)
+      if (this.snake2.direction === this.UP || this.snake2.direction === this.DOWN)
+      {
+          this.snake2.heading = this.LEFT;
+          this.snake2.head.angle=-90;
+      }
     }
+    else if (this.keyD.isDown)
+    {
+      if (this.snake2.direction === this.UP || this.snake2.direction === this.DOWN)
+      {
+          this.snake2.heading = this.RIGHT;
+          this.snake2.head.angle=90;
+      }
+    }
+    else if (this.keyW.isDown)
+    {
+      if (this.snake2.direction === this.LEFT || this.snake2.direction === this.RIGHT)
+      {
+          this.snake2.heading = this.UP;
+          this.snake2.head.angle=0;
+      }
+    }
+    else if (this.keyS.isDown)
+    {
+      if (this.snake2.direction === this.LEFT || this.snake2.direction === this.RIGHT)
+      {
+          this.snake2.heading = this.DOWN;
+          this.snake2.head.angle=180;
+      }
+    }
+
+
+
+    for(var i = 1; i <this.snake2.body.getChildren().length; i++)
+    {
+      if(this.snake.head.x==this.snake2.body.getChildren()[i].x && this.snake.head.y==this.snake2.body.getChildren()[i].y)
+      {
+        this.snake.aleive=false;
+        console.log('1')
+      }
+    }
+    for(var i = 1; i <this.snake.body.getChildren().length; i++)
+    {
+      if(this.snake2.head.x==this.snake.body.getChildren()[i].x && this.snake2.head.y==this.snake.body.getChildren()[i].y)
+      {
+        this.snake2.alive=false;
+        console.log('2')
+      }
+    }
+
+    if(this.snake.alive && this.snake2.alive){this.snake.update(time)}
+    if(this.snake.alive && this.snake2.alive){this.snake2.update(time)}
+
+
   }
 }
