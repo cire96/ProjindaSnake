@@ -17,6 +17,7 @@ class menu extends Phaser.Scene {
     this.load.image('win_2_text','assets/win_2_text.png');
     this.load.image('game_over','assets/game_over.png');
     this.load.image('start_text','assets/start_text');
+    this.load.image('tutorial', 'assets/tutorial_button.png');
     //Ljud fil gör scenen ändring långsam
     //this.load.audio('starwars', 'assets/sw.wav');
 
@@ -27,10 +28,12 @@ class menu extends Phaser.Scene {
   create(){
 
     this.add.image(0,0,'forest').setOrigin(0,0);
-    this.add.image(500,100,'start_text')
-    var singlePlayerButtom=this.add.sprite(250, 400, 'single_Buttom').setInteractive();
+    this.add.image(500,200,'start_text')
+    var singlePlayerButtom=this.add.sprite(250, 500, 'single_Buttom').setInteractive();
     //var highScoreButtom=this.add.sprite(500, 400,'highScoreButtom').setInteractive();
-    var multiPlayer=this.add.sprite(750,400,'multi_Buttom').setInteractive();
+    var multiPlayer=this.add.sprite(750,500,'multi_Buttom').setInteractive();
+    var tutorial = this.add.sprite(0,0, 'tutorial').setInteractive();
+    tutorial.setOrigin(0,0);
 
     singlePlayerButtom.on('pointerdown', function (pointer){
       this.scene.start('singlePlayer');
@@ -42,6 +45,9 @@ class menu extends Phaser.Scene {
       this.scene.start('multiPlayer');
     },this);
 
+    tutorial.on('pointerdown', function (pointer){
+      this.scene.start('tutorial')
+    },this)
 
 
   }
@@ -142,6 +148,39 @@ class win extends Phaser.Scene{
 
 }
 
+class tutorial extends Phaser.Scene{
+
+  constructor() {
+    super({key:"tutorial"});
+  }
+
+  preload() {
+    this.load.image('arrow','assets/arrow_button.png');
+    this.load.image('awsd','assets/awsd_button.png');
+
+  }
+
+  create() {
+    this.add.image(0,0,'forest').setOrigin(0,0);
+    var menubuttom=this.add.sprite(0, 0, 'menu_Buttom').setInteractive();
+    menubuttom.setOrigin(0,0);
+
+    this.add.sprite(250, 470, 'arrow');
+    this.add.text(200,535, "Player 1",  { font: "bold 24px Arial", fill: "#e67300", align: "left" })
+    this.add.sprite(700, 470, 'awsd');
+    this.add.text(650,535, "Player 2",  { font: "bold 24px Arial", fill: "#e67300", align: "left" })
+
+
+    var text = this.add.text(180, 150, "Snakeley has found himself in a forest,\nalone and hungry. He only eats grapes,\nas the python he is. For every grape he\neats, he will go a bit faster then before.\n\t\t\t\t\t\t\t\t\t\t\tHelp Snakeley find food\n\t\t\t\t\t\t\t\t\t\t\tand the way back home!", { font: "bold 35px Arial", fill: "#e67300", align: "left" });
+    text.setShadow(-2, 2, 'rgba(0, 0, 0, 0.5)', 0);
+
+    menubuttom.on('pointerdown',function(pointer){
+      this.scene.start('menu');
+    },this);
+  }
+
+}
+
 
 
 
@@ -155,7 +194,7 @@ var config = {
           gravity: {y : 0}
       }
   },
-  scene: [menu, singlePlayer, gameOver,pause,win,multiPlayer]
+  scene: [menu, singlePlayer, gameOver,pause,win,multiPlayer, tutorial]
 
 };
 
