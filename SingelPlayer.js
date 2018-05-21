@@ -144,7 +144,6 @@ class singlePlayer extends Phaser.Scene {
 
     });
 
-    this.gamePauseBool=false;
 
     this.cameras.main.setBounds(0, 0, this.worldBoundX, this.worldBoundY);
 
@@ -160,7 +159,7 @@ class singlePlayer extends Phaser.Scene {
     this.apples.create(1000,400,'apple');
     this.trunks=this.physics.add.group();
     this.trunks.create(600,300,'trunk');
-    this.trunks.create(700,1000,'bush');
+    this.trunks.create(600,900,'bush');
     this.trunks.create(100,1000,'stump');
     this.trunks.create(1000,1500,'bush');
     this.trunks.create(1000,400,'bush');
@@ -187,11 +186,11 @@ class singlePlayer extends Phaser.Scene {
       this.apples.create(x,y,'apple')
     },null,this)
 
-    this.physics.add.collider(this.snake.head,this.goal,function(){
+    this.physics.add.overlap(this.snake.head,this.goal,function(){
       this.scene.start('win',{id:3});
     },null,this)
 
-    this.physics.add.collider(this.snake.head,this.trunks,function(){this.snake.alive=false;},null,this);
+    this.physics.add.overlap(this.snake.head,this.trunks,function(){this.snake.alive=false;},null,this);
 
     this.firstcamera=this.cameras.main.startFollow(this.snake.head);
 
@@ -199,7 +198,7 @@ class singlePlayer extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
 
     //New posistion for apple when eaten
-  this.physics.add.collider(this.snake.head,this.apples,function(snake,apple){
+    this.physics.add.overlap(this.snake.head,this.apples,function(snake,apple){
     var x,y;
     this.snake.grow();
     this.snake.speed=this.snake.speed*0.99;
